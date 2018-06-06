@@ -333,8 +333,8 @@ export default {
 
       // Override the default placeholder
       // text set by Google with the
-      // placeholder prop value.
-      document.getElementById(this.id).setAttribute('placeholder', this.placeholder);
+      // placeholder prop value or an empty value.
+      document.getElementById(this.id).setAttribute('placeholder', this.placeholder ? this.placeholder : '');
 
       this.autocomplete.addListener('place_changed', () => {
         const place = this.autocomplete.getPlace();
@@ -356,6 +356,10 @@ export default {
         };
 
         const returnData = {};
+
+        if (place.formatted_address !== undefined) {
+          document.getElementById(this.id).value = place.formatted_address;
+        }
 
         if (place.address_components !== undefined) {
           // Get each component of the address from the place details
@@ -446,7 +450,7 @@ export default {
         textarea: self.textarea,
         'toggle-keys': self.toggleKeys,
         type: self.type,
-        value: self.autocompleteText,
+        value: self.value || self.autocompleteText,
         'validate-on-blur': self.validateOnBlur,
         '@focus': self.onFocus(),
         '@blur': self.onFocus(),
@@ -473,6 +477,10 @@ export default {
           if (event && event.target) {
             self.value = event.target.value;
             self.$emit('input', event.target.value);
+          } else {
+            // clear was pressed, reset this
+            self.autocompleteText = '';
+            self.$emit('placechanged', null);
           }
         },
       },
